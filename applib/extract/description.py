@@ -19,36 +19,23 @@ class Description:
     def extract(self) -> str:
         description_button_element = self._description_button_element()
 
-
         if not description_button_element:
             return ''   
 
-        self._driver.execute_script(
-            "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'end' });", 
-            description_button_element
-        )
-        description_button_element.click()
+        self._click_on_element(description_button_element)
+        
+        sleep(5)
         
         description_content_element = self._description_content_element()
 
         if not description_content_element:
             return ''
-        self._driver.execute_script(
-            "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'end' });", 
-            description_content_element
-        )
-        sleep(5)
+
         text = description_content_element.text
+
+        self._click_on_element(description_button_element)
         
-        self._driver.execute_script(
-            "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'end' });", 
-            description_button_element
-        )
-
-        description_button_element.click()
-        sleep(5)
         return text
-
 
 
 
@@ -73,3 +60,15 @@ class Description:
             )
         except TimeoutException:
             print('could not found description content element. Return None.')
+
+
+    
+    def _click_on_element(self, element: WebElement) -> None:
+        """
+        Scroll element into visible area.
+        """
+        self._driver.execute_script(
+            "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'end' });", 
+            element
+        )
+        element.click()

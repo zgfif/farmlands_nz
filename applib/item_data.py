@@ -8,6 +8,7 @@ from applib.extract.weight import Weight
 from applib.extract.rrp import Rrp
 from applib.extract.discount import Discount
 from applib.extract.sale import Sale
+from applib.extract.product_details import ProductDetails
 
 
 
@@ -20,13 +21,21 @@ class ItemData:
         """
         Return item data.
         """
-        return {
+
+        data = {
             'sku': Sku(driver=self._driver).extract(), 
             'item': Item(driver=self._driver).extract(), 
             'description': Description(driver=self._driver).extract(), 
-            'size': Size(driver=self._driver).extract(), 
-            'weight': Weight(driver=self._driver).extract(), 
+        }
+
+        product_details = ProductDetails(driver=self._driver).extract()
+
+        data.update({
+            'size': product_details['size'],
+            'weight': product_details['weight'],
             'rrp': Rrp(driver=self._driver).extract(), 
             'discount_price': Discount(driver=self._driver).extract(), 
             'promotion_price': Sale(driver=self._driver).extract(),
-        }
+        })
+
+        return data
