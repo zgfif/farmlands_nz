@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webelement import WebElement
+from logging import Logger
 
 
 
@@ -11,16 +12,25 @@ from selenium.webdriver.remote.webelement import WebElement
 class Sku:
     TIMEOUOT = 10
 
-    def __init__(self, driver: WebDriver) -> None:
+    def __init__(self, driver: WebDriver, logger: Logger) -> None:
         self._driver = driver
+        self._logger = logger
 
 
 
     def extract(self) -> str:
+        """
+        Return sku of item.
+        """
         sku_element = self._sku_element()
+        
         if not sku_element:
             return ''
+        
         sku_value = sku_element.text.split(' ')[-1]
+
+        self._logger.info('sku: %s', sku_value)
+
         return sku_value
     
 
@@ -36,4 +46,4 @@ class Sku:
                 EC.visibility_of_element_located(selector)
             )
         except TimeoutException:
-            print('could not found sku element. Return None.')
+            self._logger.info('could not found sku element. Return None.')

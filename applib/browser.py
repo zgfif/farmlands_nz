@@ -6,14 +6,15 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from applib.custom_chrome_options import CustomChromeOptions
-
+from applib.my_logger import MyLogger
+import logging
 
 
 
 class Browser:
     def __init__(self) -> None:
-        options = CustomChromeOptions().setup()
-        self._driver = webdriver.Chrome(options=options)
+        self._driver = webdriver.Chrome(options=CustomChromeOptions().setup())
+        self._logger = MyLogger().setup()
 
 
 
@@ -22,15 +23,17 @@ class Browser:
         Open page by url.
         """
         try:
+            self.logger.info('Opening \'%s\' ...', url)
+
             self._driver.get(url=url)
             WebDriverWait(self._driver, 10).until(
                 EC.presence_of_element_located((By.TAG_NAME, 'body'))
             )
-            sleep(10)
+            sleep(5)
         except TimeoutException:
-            print('Could not load body.')
+            self.logger.exception('Could not load body.')
         except WebDriverException:
-            print('Could not open url.')
+            self.logger.exception('Could not open url.')
 
 
 
@@ -43,6 +46,15 @@ class Browser:
 
 
 
+    @property
+    def logger(self) -> logging.Logger:
+        """
+        Return the instance of logger.
+        """
+        return self._logger
+
+
+
     def close(self) -> None:
         """
         Close browser.
@@ -50,5 +62,5 @@ class Browser:
         if not self._driver:
             return
 
-        print('Closing browser...')
+        self.logger.info('Closing browser...')
         self._driver.quit()

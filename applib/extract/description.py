@@ -5,18 +5,23 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webelement import WebElement
 from time import sleep
+from logging import Logger
 
 
 
 class Description:
     TIMEOUOT = 10
 
-    def __init__(self, driver: WebDriver) -> None:
+    def __init__(self, driver: WebDriver, logger: Logger) -> None:
         self._driver = driver
+        self._logger = logger
 
 
 
     def extract(self) -> str:
+        """
+        Return description of item.
+        """
         description_button_element = self._description_button_element()
 
         if not description_button_element:
@@ -35,11 +40,16 @@ class Description:
 
         self._click_on_element(description_button_element)
         
+        self._logger.info('description: %s', text)
+        
         return text
 
 
 
     def _description_button_element(self) -> WebElement|None:
+        """
+        Return element to open Description. If could not found return None.
+        """
         selector = (By.XPATH, '//h2[contains(text(), "Description")]')
 
         try:
@@ -47,11 +57,14 @@ class Description:
                 EC.visibility_of_element_located(selector)
             )
         except TimeoutException:
-            print('could not found description element. Return None.')
+            self._logger.info('could not found description element. Return None.')
 
 
 
     def _description_content_element(self) -> WebElement|None:
+        """
+        Return element containing Description. If could not found return None.
+        """
         selector = (By.CSS_SELECTOR, 'div.accordion-details__content.rte')
 
         try:
@@ -59,13 +72,13 @@ class Description:
                 EC.visibility_of_element_located(selector)
             )
         except TimeoutException:
-            print('could not found description content element. Return None.')
+            self._logger.info('could not found description content element. Return None.')
 
 
     
     def _click_on_element(self, element: WebElement) -> None:
         """
-        Scroll element into visible area.
+        Scroll element into visible area and click on it.
         """
         self._driver.execute_script(
             "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'end' });", 

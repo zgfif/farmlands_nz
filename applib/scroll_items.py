@@ -1,19 +1,19 @@
 from selenium.webdriver.chrome.webdriver import WebDriver
 from time import sleep
 from selenium.webdriver.remote.webelement import WebElement
-
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from logging import Logger
 
 
 
 
 class ScrollItems:
-    def __init__(self, driver: WebDriver) -> None:
+    def __init__(self, driver: WebDriver, logger: Logger) -> None:
         self._driver = driver
+        self._logger = logger
         self._urls = []
 
 
@@ -22,7 +22,8 @@ class ScrollItems:
         """
         Perform scrolling of page while the is button 'load more'.
         """
-        print('current count of elemnts:', len(self._items_elements()))
+        self._logger.info('current count of elemnts: %d', len(self._items_elements()))
+
         while self._load_more_button_element():
             self._scroll_to_bottom()
             
@@ -33,10 +34,12 @@ class ScrollItems:
             if button:
                 self._driver.execute_script('arguments[0].scrollIntoView()', button)
                 button.click()
+            
             sleep(1)
-            print('current count of elemnts:', len(self._items_elements()))
 
-        print('Stop scrolling.')
+            self._logger.info('current count of elemnts: %d', len(self._items_elements()))
+
+        self._logger.info('Stop scrolling.')
         items = self._items_elements()
         
         self._urls = [item.find_element(By.TAG_NAME, 'a').get_attribute('href') for item in items]
@@ -49,7 +52,7 @@ class ScrollItems:
         """
         Scrolling to bottom of page.
         """
-        print('scrolling to the bottom...') 
+        self._logger.info('scrolling to the bottom...') 
         self._driver.execute_script('window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });')
 
 
@@ -65,7 +68,7 @@ class ScrollItems:
                 EC.presence_of_element_located(selector)
             )
         except TimeoutException:
-            print('Could not found Load more button element. Return None')
+            self._logger.info('Could not found Load more button element. Return None')
 
 
 
@@ -81,7 +84,7 @@ class ScrollItems:
                 EC.presence_of_all_elements_located(selector)
             )
         except TimeoutException:
-            print('Could not find any item elements. Returning empty list.')
+            self._logger.exception('Could not find any item elements. Returning empty list.')
             return []
 
 
