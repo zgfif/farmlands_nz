@@ -14,9 +14,14 @@ class CollectData:
     def perform(self) -> None:
         browser = Browser()
         browser.open(url=self._url)
-
+        
+        if not browser.driver:
+            return
+        
         scrolling = ScrollItems(driver=browser.driver, logger=browser.logger)
         scrolling.perform()
+
+        browser.logger.info('Start processing product urls...')
 
         for url in scrolling.items_urls:
             browser.open(url)

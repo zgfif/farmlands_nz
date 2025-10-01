@@ -10,7 +10,10 @@ class TestBrowser(unittest.TestCase):
         browser = Browser()
 
         browser.open(url=url)
-
+        
+        if not browser.driver:
+            return
+        
         self.assertEqual(browser.driver.current_url, url)
 
         browser.close()

@@ -3,11 +3,11 @@ from selenium.webdriver.chrome.options import Options
 
 
 class CustomChromeOptions:
-    def __init__(self,) -> None:
+    def __init__(self) -> None:
         self._options = Options()
     
 
-    def setup(self,) -> Options:
+    def setup(self) -> Options:
         """
         Configure options object for Chrome and return it.
         """

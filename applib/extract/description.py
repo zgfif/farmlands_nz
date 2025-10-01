@@ -1,87 +1,58 @@
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webelement import WebElement
-from time import sleep
-from logging import Logger
+
+from applib.extract.base_extractor import BaseExtractor
 
 
 
-class Description:
-    TIMEOUOT = 10
-
-    def __init__(self, driver: WebDriver, logger: Logger) -> None:
-        self._driver = driver
-        self._logger = logger
-
-
-
+class Description(BaseExtractor):
     def extract(self) -> str:
         """
-        Return description of item.
+        Return description of item. If not found, return empty string.
         """
-        description_button_element = self._description_button_element()
-
-        if not description_button_element:
+        button = self._description_button_element()
+        if not button:
             return ''   
 
-        self._click_on_element(description_button_element)
-        
-        sleep(5)
-        
-        description_content_element = self._description_content_element()
+        # open description block
+        self._click_on_element(button)
 
-        if not description_content_element:
+        content = self._description_content_element()
+        if not content:
             return ''
+        
+        # extract description content
+        text = content.text.strip()
+        if not text:
+            self._logger.debug('Description content is empty.')
 
-        text = description_content_element.text
-
-        self._click_on_element(description_button_element)
+        # close description block
+        self._click_on_element(button)
         
         self._logger.info('description: %s', text)
-        
         return text
 
 
 
-    def _description_button_element(self) -> WebElement|None:
+    def _description_button_element(self) -> WebElement | None:
         """
-        Return element to open Description. If could not found return None.
+        Return element to open Description. If could not found, return None.
         """
-        selector = (By.XPATH, '//h2[contains(text(), "Description")]')
-
-        try:
-            return WebDriverWait(self._driver, self.TIMEOUOT).until(
-                EC.visibility_of_element_located(selector)
-            )
-        except TimeoutException:
-            self._logger.info('could not found description element. Return None.')
+        return self._find_element(
+            selector=(By.XPATH, '//h2[contains(text(), "Description")]'),
+            condition = EC.presence_of_element_located,
+            description='description button',
+        )
 
 
 
-    def _description_content_element(self) -> WebElement|None:
+    def _description_content_element(self) -> WebElement | None:
         """
         Return element containing Description. If could not found return None.
         """
-        selector = (By.CSS_SELECTOR, 'div.accordion-details__content.rte')
-
-        try:
-            return WebDriverWait(self._driver, self.TIMEOUOT).until(
-                EC.visibility_of_element_located(selector)
-            )
-        except TimeoutException:
-            self._logger.info('could not found description content element. Return None.')
-
-
-    
-    def _click_on_element(self, element: WebElement) -> None:
-        """
-        Scroll element into visible area and click on it.
-        """
-        self._driver.execute_script(
-            "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'end' });", 
-            element
+        return self._find_element(
+            selector=(By.CSS_SELECTOR, 'div.accordion-details__content.rte'),
+            condition = EC.visibility_of_element_located,
+            description='description content',
         )
-        element.click()

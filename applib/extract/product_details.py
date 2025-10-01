@@ -1,99 +1,66 @@
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webelement import WebElement
-from time import sleep
-from logging import Logger
+from applib.extract.base_extractor import BaseExtractor
 
 
 
-
-class ProductDetails:
-    TIMEOUOT = 10
-
-    def __init__(self, driver: WebDriver, logger: Logger) -> None:
-        self._driver = driver
-        self._logger = logger
-
-
-
+class ProductDetails(BaseExtractor):
     def extract(self) -> dict:
         """
         Return dict containing 'size' and 'weight' of item.
         """
-        data = {
-            'size': '',
-            'weight': '',
-        }
+        data = { 'size': '', 'weight': '', }
 
-        details_button = self._details_button_element()
-
-        if not details_button:
+        button = self._details_button_element()
+        if not button:
             return data
         
-        self._click_on_element(details_button)
+        self._click_on_element(button) # open
+
         details_specs = self._details_specs_elements()
-
-        if not details_specs:
+        if len(details_specs) < 6:
+            self._logger.debug('Not enough detail elements found, returning empty data.')
+            self._click_on_element(button) # close          
             return data
         
-        size = f'{details_specs[3].text} {details_specs[4].text} {details_specs[5].text}'
+        size = ' '.join([details_specs[i].text for i in range(3, 6)])
         weight = details_specs[1].text
 
-        data.update({
-            'size': size,
-            'weight': weight,
-        })
+        data.update({ 'size': size, 'weight': weight, })
 
-        self._click_on_element(details_button)
+        self._click_on_element(button) # close
 
         self._logger.info('size: %s', size)
-        
         self._logger.info('weight: %s', weight)
 
         return data
 
 
 
-    def _details_button_element(self) -> WebElement|None:
+    def _details_button_element(self) -> WebElement | None:
         """
         Return element to open Product Details. If could not found return None.
         """
-        selector = (By.XPATH, '//h2[contains(text(), "Product Details")]')
-
-        try:
-            return WebDriverWait(self._driver, self.TIMEOUOT).until(
-                EC.visibility_of_element_located(selector)
-            )
-        except TimeoutException:
-            self._logger.info('could not found Details button element. Return None.')
+        return self._find_element(
+            selector=(By.XPATH, '//h2[contains(text(), "Product Details")]'),
+            condition=EC.element_to_be_clickable,
+            description='Details button',
+        )
 
 
-
-    def _details_specs_elements(self) -> list[WebElement]|None:
+    def _details_specs_elements(self) -> list[WebElement]:
         """
         Return the list of elements with specs of Item. If could not found return an empty list.
         """
-        selector = (By.CSS_SELECTOR, 'ul.product-details-list > li')
+        selector=(By.CSS_SELECTOR, 'ul.product-details-list > li')
 
         try:
-            return WebDriverWait(self._driver, self.TIMEOUOT).until(
+            return WebDriverWait(self._driver, self.TIMEOUT).until(
                 EC.visibility_of_all_elements_located(selector)
             )
         except TimeoutException:
-            self._logger.info('could not found Details content element. Return None.')
-
-
-
-    def _click_on_element(self, element: WebElement) -> None:
-        """
-        Scroll element into visible area and click on it.
-        """
-        self._driver.execute_script(
-            "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'bottom', inline: 'end' });", 
-            element
-        )
-        sleep(1)
-        element.click()
+            self._logger.info('could not found Details content elements. Return empty list.')
+            return []

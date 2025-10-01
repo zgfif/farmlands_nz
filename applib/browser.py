@@ -1,20 +1,28 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException, TimeoutException
-from time import sleep
-from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from applib.custom_chrome_options import CustomChromeOptions
 from applib.my_logger import MyLogger
-import logging
+from logging import Logger
 
 
 
 class Browser:
     def __init__(self) -> None:
-        self._driver = webdriver.Chrome(options=CustomChromeOptions().setup())
+        self._driver: webdriver.Chrome | None = None
         self._logger = MyLogger().setup()
+        self.start()
+
+
+    def start(self) -> None:
+        """
+        Start Chrome driver with custom options.        
+        """
+        if self._driver is None:
+            self._driver = webdriver.Chrome(options=CustomChromeOptions().setup())
+            self.logger.info('Browser started.')
 
 
 
@@ -22,23 +30,27 @@ class Browser:
         """
         Open page by url.
         """
+        if not self._driver:
+            self.logger.error('Driver is not initialized.')
+            return
+        
         try:
             self.logger.info('Opening \'%s\' ...', url)
-
             self._driver.get(url=url)
+            
             WebDriverWait(self._driver, 10).until(
                 EC.presence_of_element_located((By.TAG_NAME, 'body'))
             )
-            sleep(5)
+            self.logger.info('Page loaded successfully.')
         except TimeoutException:
-            self.logger.exception('Could not load body.')
-        except WebDriverException:
-            self.logger.exception('Could not open url.')
+            self.logger.error('Could not load body for %s .', url)
+        except WebDriverException as e:
+            self.logger.exception('WebDriverException while opening url: %s', e)
 
 
 
     @property
-    def driver(self) -> WebDriver:
+    def driver(self) -> webdriver.Chrome | None:
         """
         Return the instance of driver.
         """
@@ -47,7 +59,7 @@ class Browser:
 
 
     @property
-    def logger(self) -> logging.Logger:
+    def logger(self) -> Logger:
         """
         Return the instance of logger.
         """
@@ -59,8 +71,13 @@ class Browser:
         """
         Close browser.
         """
-        if not self._driver:
+        if self._driver is None:
             return
 
-        self.logger.info('Closing browser...')
-        self._driver.quit()
+        try:
+            self.logger.info('Closing browser...')
+            self._driver.quit()
+        except WebDriverException:
+            self.logger.warning('Driver is already closed or not available.')
+        finally:
+            self._driver = None

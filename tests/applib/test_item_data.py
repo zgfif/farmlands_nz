@@ -11,8 +11,11 @@ class TestItemData(unittest.TestCase):
         browser = Browser()
         
         browser.open(url=url)
+
+        if not browser.driver:
+            return
         
-        data = ItemData(driver=browser.driver).extract()
+        data = ItemData(driver=browser.driver, logger=browser.logger).extract()
         
         self.assertIsInstance(data, dict)
         

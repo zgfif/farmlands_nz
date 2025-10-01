@@ -13,6 +13,9 @@ class MyLogger:
 
 
     def setup(self) -> logging.Logger:
+        """
+        Return configured logger (saving to log file and show on stderr).
+        """
         logger = logging.getLogger(__name__)
 
         logger.setLevel(self._level)
@@ -23,9 +26,7 @@ class MyLogger:
 
         for handler in console_handler, file_handler:
             handler.setLevel(self._level)
-
             handler.setFormatter(self._formatter())
-
             logger.addHandler(handler)
 
         return logger
@@ -41,6 +42,9 @@ class MyLogger:
 
 
     def _formatter(self) -> logging.Formatter:
+        """
+        Return formatter for logger.
+        """
         return logging.Formatter(
             fmt='%(asctime)s - %(levelname)s - %(message)s', 
             style='%',

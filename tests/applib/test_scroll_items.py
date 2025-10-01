@@ -10,7 +10,10 @@ class TestScrollItems(unittest.TestCase):
         browser = Browser()
         browser.open(url=url)
 
-        scrolling = ScrollItems(driver=browser.driver)
+        if not browser.driver:
+            return
+
+        scrolling = ScrollItems(driver=browser.driver, logger=browser.logger)
         
         scrolling.perform()
 
