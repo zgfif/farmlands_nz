@@ -35,7 +35,7 @@ class BaseExtractor:
         Scroll element into visible area and click on it.
         """
         self._driver.execute_script(
-            "arguments[0].scrollIntoView({ behavior: 'auto', block: 'bottom', inline: 'end' });", 
+            "arguments[0].scrollIntoView({ behavior: 'instant', block: 'center', inline: 'end' });", 
             element
         )
         sleep(1)

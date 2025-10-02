@@ -1,10 +1,10 @@
 import unittest
-from applib.items_urls import ItemsUrls
+from applib.item_urls_collector import ItemUrlsCollector
 from applib.browser import Browser
 
 
 
-class TestItemsUrls(unittest.TestCase):
+class TestItemsUrlsCollector(unittest.TestCase):
     def test_collect(self):
         url = 'https://shop.farmlands.co.nz/collections/animal-type-sheep-lamb'
         
@@ -14,7 +14,7 @@ class TestItemsUrls(unittest.TestCase):
         if not browser.driver:
             return
         
-        items_urls = ItemsUrls(driver=browser.driver, logger=browser.logger).collect()
+        items_urls = ItemUrlsCollector(driver=browser.driver, logger=browser.logger).collect()
 
         self.assertIsInstance(items_urls, list)
         self.assertEqual(len(items_urls), 32)

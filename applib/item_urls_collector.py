@@ -9,28 +9,27 @@ from logging import Logger
 
 
 
-class ItemsUrls:
+class ItemUrlsCollector:
     def __init__(self, driver: WebDriver, logger: Logger) -> None:
         self._driver = driver
         self._logger = logger
-        self._urls = []
 
 
 
-    def collect(self) -> list:
+    def collect(self) -> list[str|None]:
         """
         Return list containing items urls.
         """
         items = self._items_elements()
         
-        if not items:
-            return []
-        
-        return [item.find_element(By.TAG_NAME, 'a').get_attribute('href') for item in items]
+        return [
+            item.find_element(By.TAG_NAME, 'a').get_attribute('href') 
+            for item in items
+        ]
 
 
 
-    def _items_elements(self) -> list:
+    def _items_elements(self) -> list[WebElement]:
         """
         Return list of item elements (div.f-column.card).
         If no elements are found, return an empty list.
@@ -42,5 +41,5 @@ class ItemsUrls:
                 EC.presence_of_all_elements_located(selector)
             )
         except TimeoutException:
-            self._logger.exception('Could not find any item elements. Returning empty list.')
+            self._logger.warning('No items found.')
             return []

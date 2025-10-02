@@ -2,7 +2,7 @@ from applib.browser import Browser
 from applib.items_loading import ItemsLoading
 from applib.item_data import ItemData
 from applib.xlsx_file import XlsxFile
-from applib.items_urls import ItemsUrls
+from applib.item_urls_collector import ItemUrlsCollector
 
 
 
@@ -23,7 +23,7 @@ class CollectData:
         
         ItemsLoading(driver=browser.driver, logger=browser.logger).perform()
         
-        items_urls = ItemsUrls(driver=browser.driver, logger=browser.logger).collect()
+        items_urls = ItemUrlsCollector(driver=browser.driver, logger=browser.logger).collect()
 
         if not items_urls:
             return
@@ -33,7 +33,8 @@ class CollectData:
         xlsx = XlsxFile(logger=browser.logger, filepath=self._filepath)
 
         for url in items_urls:
-            browser.open(url)
+            if url:
+                browser.open(url)
 
             data = ItemData(driver=browser.driver, logger=browser.logger).extract()
 
