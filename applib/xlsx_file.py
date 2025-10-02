@@ -22,58 +22,78 @@ class XlsxFile:
         self._filepath = filepath
         self._logger = logger
         self._prepare_file()
+        self._workbook = openpyxl.load_workbook(self._filepath)
+        
+        self._sheet = self._workbook.active
 
     
 
-    def add_row(self, data: dict[str, str]) -> None:
+    def add_row(self, data: tuple) -> None:
         """
-        Add row to end of xlsx file. Where keys are column names and values  - row data.
+        Add row to end of xlsx file.
         """
-        workbook = openpyxl.load_workbook(self._filepath)
-        
-        sheet = workbook.active
-
-        if not sheet:
-            self._logger.warning('No active sheet to add row')
+        if not self._sheet:
+            self._logger.warning('No active sheet to add row.')
             return
 
-        sheet.append(list(data.values()))
+        self._sheet.append(data)
         
-        workbook.save(self._filepath)
+        self._workbook.save(self._filepath)
+
 
 
     def rows(self) -> tuple:
         """
         Return rows from xlsx file.
         """
-        wb = openpyxl.load_workbook(self._filepath)
-
-        # Select the active sheet
-        sheet = wb.active
-        
-        if not sheet:
+        if not self._sheet:
             self._logger.warning('no active sheet. Return an empty tuple.')
             return tuple()
         
-        rows = []
+        return tuple(row for row in self._sheet.iter_rows(min_row=1, max_row=self._sheet.max_row, values_only=True))
 
-        # Read and print the data
-        for row in sheet.iter_rows(min_row=1, max_row=sheet.max_row, values_only=True):
-            rows.append(row)
-    
-        return tuple(rows)
 
 
     def _prepare_file(self) -> None:
+        """
+        Prepare path for file.
+        """
         file_path = Path(self._filepath)
+
+        if Path.exists(file_path):
+            self._logger.info('file %s already exists.', self._filepath)
+            return
+        
+        self._logger.info('Create file %s ...', self._filepath)
         
         file_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        self._create_with_columns()
 
-        if not Path.exists(file_path):
-            wb = Workbook()
-            sheet = wb.active
-            if not sheet:
-                self._logger.warning('Could not found active sheet.')
-                return
-            sheet.append(self.COLUMNS)
-            wb.save(self._filepath)
+
+
+    def _create_with_columns(self) -> None:
+        """
+        Create a xlsx file.
+        """
+        workbook = Workbook()
+        
+        sheet = workbook.active
+        
+        if not sheet:
+            self._logger.warning('Could not found active sheet.')
+            return
+
+        sheet.append(self.COLUMNS)
+        
+        workbook.save(self._filepath)
+
+
+
+    def close(self) -> None:
+        """
+        Close workbook.
+        """
+        if self._workbook:
+            self._logger.debug('Closing %s ...', self._filepath)
+            self._workbook.close()

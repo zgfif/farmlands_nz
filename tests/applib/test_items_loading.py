@@ -1,20 +1,20 @@
 import unittest
-from applib.scroll_items import ScrollItems
+from applib.items_loading import ItemsLoading
 from applib.browser import Browser
 
 
 
 class TestScrollItems(unittest.TestCase):
-    def test_scroll_items(self):
+    def test_show_items(self):
         url = 'https://shop.farmlands.co.nz/collections/animal-type-calf'
+        
         browser = Browser()
+        
         browser.open(url=url)
 
         if not browser.driver:
             return
 
-        scrolling = ScrollItems(driver=browser.driver, logger=browser.logger)
-        
-        scrolling.perform()
+        ItemsLoading(driver=browser.driver, logger=browser.logger).perform()
 
         browser.close()

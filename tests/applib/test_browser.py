@@ -17,4 +17,3 @@ class TestBrowser(unittest.TestCase):
         self.assertEqual(browser.driver.current_url, url)
 
         browser.close()
-

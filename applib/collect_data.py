@@ -1,31 +1,44 @@
 from applib.browser import Browser
-from applib.scroll_items import ScrollItems
+from applib.items_loading import ItemsLoading
 from applib.item_data import ItemData
 from applib.xlsx_file import XlsxFile
+from applib.items_urls import ItemsUrls
 
 
 
 class CollectData:
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, filepath: str = 'data.xlsx') -> None:
         self._url = url
+        self._filepath = filepath
 
 
 
     def perform(self) -> None:
         browser = Browser()
+
         browser.open(url=self._url)
         
         if not browser.driver:
             return
         
-        scrolling = ScrollItems(driver=browser.driver, logger=browser.logger)
-        scrolling.perform()
+        ItemsLoading(driver=browser.driver, logger=browser.logger).perform()
+        
+        items_urls = ItemsUrls(driver=browser.driver, logger=browser.logger).collect()
+
+        if not items_urls:
+            return
 
         browser.logger.info('Start processing product urls...')
 
-        for url in scrolling.items_urls:
-            browser.open(url)
-            data = ItemData(driver=browser.driver, logger=browser.logger).extract()
-            XlsxFile(logger=browser.logger, filepath='data.xlsx').add_row(data)
+        xlsx = XlsxFile(logger=browser.logger, filepath=self._filepath)
 
+        for url in items_urls:
+            browser.open(url)
+
+            data = ItemData(driver=browser.driver, logger=browser.logger).extract()
+
+            xlsx.add_row(tuple(data.values()))
+        
+        xlsx.close()
+        
         browser.close()

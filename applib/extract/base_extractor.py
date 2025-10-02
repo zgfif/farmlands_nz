@@ -4,7 +4,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from typing import Callable
-
+from time import sleep
 
 
 class BaseExtractor:
@@ -35,7 +35,8 @@ class BaseExtractor:
         Scroll element into visible area and click on it.
         """
         self._driver.execute_script(
-            "arguments[0].scrollIntoView({ behavior: 'smooth', block: 'bottom', inline: 'end' });", 
+            "arguments[0].scrollIntoView({ behavior: 'auto', block: 'bottom', inline: 'end' });", 
             element
         )
+        sleep(1)
         element.click()

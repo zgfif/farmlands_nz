@@ -21,7 +21,8 @@ class Browser:
         Start Chrome driver with custom options.        
         """
         if self._driver is None:
-            self._driver = webdriver.Chrome(options=CustomChromeOptions().setup())
+            options = CustomChromeOptions(logger=self._logger).setup()
+            self._driver = webdriver.Chrome(options=options)
             self.logger.info('Browser started.')
 
 

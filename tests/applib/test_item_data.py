@@ -20,3 +20,6 @@ class TestItemData(unittest.TestCase):
         self.assertIsInstance(data, dict)
         
         print(data)
+
+        browser.close()
+
