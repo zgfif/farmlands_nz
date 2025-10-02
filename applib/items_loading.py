@@ -1,11 +1,11 @@
 from selenium.webdriver.chrome.webdriver import WebDriver
-from time import sleep
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from logging import Logger
+from typing import Optional
 
 
 
@@ -19,21 +19,24 @@ class ItemsLoading:
 
     def perform(self) -> None:
         """
-        Perform scrolling of page while the is button 'load more'.
+        Perform click on button 'load more' while it exists.
         """
         self._logger.info('Loading items...')
-
-        while self._load_more_button_element():
-            sleep(1)
+        
+        while True:           
             load_more_button = self._load_more_button_element()
-            
             if not load_more_button:
                 break
             
-            self._logger.info('Click \'load more\'...')
-            self._click_on_element(load_more_button)
+            try:
+                self._click_on_element(load_more_button)
+                self._logger.info("Click 'load more'...")
+            except StaleElementReferenceException:
+                self._logger.debug("'Load more' button went stale, retrying...")
+                continue
+
         
-        self._logger.info('Stop loading items.')
+        self._logger.info('Finish loading items.')
 
 
 
@@ -43,15 +46,14 @@ class ItemsLoading:
         Scroll element into visible area and click on it.
         """
         self._driver.execute_script(
-            "arguments[0].scrollIntoView({ behavior: 'auto', block: 'bottom', inline: 'end' });", 
+            "arguments[0].scrollIntoView({ behavior: 'instant', block: 'center', inline: 'end' });", 
             element
         )
-        sleep(1)
         element.click()
 
 
     
-    def _load_more_button_element(self) -> WebElement|None:
+    def _load_more_button_element(self) -> Optional[WebElement]:
         """
         Return Load more button element. If could not found return None.
         """
@@ -59,7 +61,7 @@ class ItemsLoading:
         
         try:
             return WebDriverWait(self._driver, 5).until(
-                EC.presence_of_element_located(selector)
+                EC.element_to_be_clickable(selector)
             )
         except TimeoutException:
-            self._logger.info('Could not found Load more button element. Return None.')
+            self._logger.debug("'Load more' button not found. Return None.")

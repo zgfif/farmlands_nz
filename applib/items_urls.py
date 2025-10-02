@@ -1,5 +1,4 @@
 from selenium.webdriver.chrome.webdriver import WebDriver
-from time import sleep
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
@@ -19,6 +18,9 @@ class ItemsUrls:
 
 
     def collect(self) -> list:
+        """
+        Return list containing items urls.
+        """
         items = self._items_elements()
         
         if not items:
