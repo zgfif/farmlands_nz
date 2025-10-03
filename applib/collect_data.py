@@ -21,23 +21,19 @@ class CollectData:
         if not browser.driver:
             return
         
+        # load all items on page
         ItemsLoading(driver=browser.driver, logger=browser.logger).perform()
         
+        # collect items urls
         items_urls = ItemUrlsCollector(driver=browser.driver, logger=browser.logger).collect()
-
-        if not items_urls:
-            return
 
         browser.logger.info('Start processing product urls...')
 
         xlsx = XlsxFile(logger=browser.logger, filepath=self._filepath)
 
         for url in items_urls:
-            if url:
-                browser.open(url)
-
+            browser.open(url)
             data = ItemData(driver=browser.driver, logger=browser.logger).extract()
-
             xlsx.add_row(tuple(data.values()))
         
         xlsx.close()
