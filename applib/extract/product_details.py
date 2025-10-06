@@ -18,6 +18,8 @@ class ProductDetails(BaseExtractor):
         if not button:
             return data
         
+        button_initial_height = self._driver.execute_script('return arguments[0].clientHeight', button)
+
         self._click_on_element(button) # open
 
         details_specs = self._details_specs_elements()
@@ -30,8 +32,18 @@ class ProductDetails(BaseExtractor):
         weight = details_specs[1].text
 
         data.update({ 'size': size, 'weight': weight, })
+        
+        WebDriverWait(self._driver, 10).until(
+            lambda d: d.execute_script('return arguments[0].clientHeight', button) > button_initial_height
+        )
 
         self._click_on_element(button) # close
+
+        current_height = self._driver.execute_script('return arguments[0].clientHeight', button)
+
+        WebDriverWait(self._driver, 10).until(
+            lambda d: d.execute_script('return arguments[0].clientHeight', button) == current_height
+        )
 
         self._logger.info('size: %s', size)
         self._logger.info('weight: %s', weight)
@@ -45,7 +57,7 @@ class ProductDetails(BaseExtractor):
         Return element to open Product Details. If could not found return None.
         """
         return self._find_element(
-            selector=(By.XPATH, '//h2[contains(text(), "Product Details")]'),
+            selector=(By.CSS_SELECTOR, 'div.product__block.product__block--product-details'),
             condition=EC.element_to_be_clickable,
             description='Details button',
         )
@@ -64,3 +76,11 @@ class ProductDetails(BaseExtractor):
         except TimeoutException:
             self._logger.info('could not found Details content elements. Return empty list.')
             return []
+
+
+    def _details_element(self, parent) -> WebElement | None:
+        try:
+            return parent.find_element(By.TAG_NAME, 'details')
+        except Exception:
+            self._logger.info('Can not find details tag.')
+            return None

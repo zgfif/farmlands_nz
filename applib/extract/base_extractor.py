@@ -1,10 +1,12 @@
 from logging import Logger
 from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from typing import Callable
 from time import sleep
+
+
 
 
 class BaseExtractor:
@@ -34,9 +36,16 @@ class BaseExtractor:
         """
         Scroll element into visible area and click on it.
         """
+        self._scroll_to_element(element)
+        element.click()
+
+
+    
+    def _scroll_to_element(self, element: WebElement) -> None:
+        """
+        Scroll to element.
+        """
         self._driver.execute_script(
-            "arguments[0].scrollIntoView({ behavior: 'instant', block: 'center', inline: 'end' });", 
+            "arguments[0].scrollIntoView({ behavior: 'instant', block: 'bottom', inline: 'end' });", 
             element
         )
-        sleep(1)
-        element.click()

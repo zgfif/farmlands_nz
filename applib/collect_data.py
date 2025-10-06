@@ -14,28 +14,26 @@ class CollectData:
 
 
     def perform(self) -> None:
-        browser = Browser()
+        with Browser() as browser:
+            browser.open(url=self._url)
 
-        browser.open(url=self._url)
-        
-        if not browser.driver:
-            return
-        
-        # load all items on page
-        ItemsLoading(driver=browser.driver, logger=browser.logger).perform()
-        
-        # collect items urls
-        items_urls = ItemUrlsCollector(driver=browser.driver, logger=browser.logger).collect()
+            if not browser.driver:
+                return
 
-        browser.logger.info('Start processing product urls...')
+            # load all items on page
+            ItemsLoading(driver=browser.driver, logger=browser.logger).perform()
+            
+            # collect items urls
+            items_urls = ItemUrlsCollector(driver=browser.driver, logger=browser.logger).collect()
 
-        xlsx = XlsxFile(logger=browser.logger, filepath=self._filepath)
+            browser.logger.info('Start processing product urls...')
 
-        for url in items_urls:
-            browser.open(url)
-            data = ItemData(driver=browser.driver, logger=browser.logger).extract()
-            xlsx.add_row(tuple(data.values()))
-        
-        xlsx.close()
-        
-        browser.close()
+            with XlsxFile(logger=browser.logger, filepath=self._filepath) as file:
+                for i, url in enumerate(items_urls, 1):
+                    try:
+                        browser.logger.info('[%d/%d] Processing %s', i, len(items_urls), url)
+                        browser.open(url)
+                        data = ItemData(driver=browser.driver, logger=browser.logger).extract()
+                        file.add_row(data)
+                    except Exception as e:
+                        browser.logger.error('Error during processing %s %s', url, e)

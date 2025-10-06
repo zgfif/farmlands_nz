@@ -35,9 +35,7 @@ class ItemsLoading:
                 self._logger.debug("'Load more' button went stale, retrying...")
                 continue
 
-        
         self._logger.info('Finish loading items.')
-
 
 
 

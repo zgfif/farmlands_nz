@@ -8,18 +8,14 @@ class TestItemData(unittest.TestCase):
     def test_extract_item_data(self):
         url = 'https://shop.farmlands.co.nz/products/reliance-free-range-pellets-25kg'
 
-        browser = Browser()
-        
-        browser.open(url=url)
+        with Browser() as browser:
+            browser.open(url=url)
 
-        if not browser.driver:
-            return
-        
-        data = ItemData(driver=browser.driver, logger=browser.logger).extract()
-        
-        self.assertIsInstance(data, dict)
-        
-        print(data)
-
-        browser.close()
-
+            if not browser.driver:
+                return
+            
+            data = ItemData(driver=browser.driver, logger=browser.logger).extract()
+            
+            self.assertIsInstance(data, tuple)
+            
+            print(data)

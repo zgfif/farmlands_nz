@@ -21,7 +21,7 @@ class Browser:
         Start Chrome driver with custom options.        
         """
         if self._driver is None:
-            options = CustomChromeOptions(logger=self._logger).setup()
+            options = CustomChromeOptions(logger=self._logger, headless=False).setup()
             self._driver = webdriver.Chrome(options=options)
             self.logger.info('Browser started.')
 
@@ -82,3 +82,19 @@ class Browser:
             self.logger.warning('Driver is already closed or not available.')
         finally:
             self._driver = None
+
+
+
+    def __enter__(self):
+        """
+        Enter in with statement.
+        """
+        return self
+
+
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """
+        Exit from with statement.
+        """
+        self.close()

@@ -16,7 +16,7 @@ class ItemData:
         self._logger = logger
 
 
-    def extract(self) -> dict:
+    def extract(self) -> tuple:
         """
         Return item data.
         """
@@ -36,5 +36,7 @@ class ItemData:
             'discount_price': Discount(driver=self._driver, logger=self._logger).extract(), 
             'promotion_price': Sale(driver=self._driver, logger=self._logger).extract(),
         })
+ 
         self._logger.info(data)
-        return data
+ 
+        return tuple(data.values())
