@@ -10,6 +10,7 @@ class Sale(BaseExtractor):
         """
         Return sale price of the item. Returns empty string if not found.
         """
+        return ''
         sale_element = self._sale_element()
 
         if not sale_element:

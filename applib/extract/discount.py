@@ -13,6 +13,7 @@ class Discount(BaseExtractor):
         """
         Return discount text. If table not found, return empty string.
         """
+        return ''
         discount_table_element = self._discount_table_element()
         if not discount_table_element:
             return ''

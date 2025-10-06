@@ -17,7 +17,7 @@ class Description(BaseExtractor):
             return ''
         
         button_initial_height = self._driver.execute_script('return arguments[0].clientHeight', button)
-        print(type(button_initial_height))
+
         # open description block
         self._click_on_element(button)        
 

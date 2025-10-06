@@ -39,10 +39,8 @@ class ProductDetails(BaseExtractor):
 
         self._click_on_element(button) # close
 
-        current_height = self._driver.execute_script('return arguments[0].clientHeight', button)
-
         WebDriverWait(self._driver, 10).until(
-            lambda d: d.execute_script('return arguments[0].clientHeight', button) == current_height
+            lambda d: d.execute_script('return arguments[0].clientHeight', button) == button_initial_height
         )
 
         self._logger.info('size: %s', size)
@@ -63,6 +61,7 @@ class ProductDetails(BaseExtractor):
         )
 
 
+
     def _details_specs_elements(self) -> list[WebElement]:
         """
         Return the list of elements with specs of Item. If could not found return an empty list.
@@ -76,11 +75,3 @@ class ProductDetails(BaseExtractor):
         except TimeoutException:
             self._logger.info('could not found Details content elements. Return empty list.')
             return []
-
-
-    def _details_element(self, parent) -> WebElement | None:
-        try:
-            return parent.find_element(By.TAG_NAME, 'details')
-        except Exception:
-            self._logger.info('Can not find details tag.')
-            return None
