@@ -6,10 +6,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from applib.custom_chrome_options import CustomChromeOptions
 from applib.my_logger import MyLogger
 from logging import Logger
+from applib.with_mixin import WithMixin
 
 
 
-class Browser:
+
+class Browser(WithMixin):
     def __init__(self) -> None:
         self._driver: webdriver.Chrome | None = None
         self._logger = MyLogger().setup()
@@ -83,18 +85,3 @@ class Browser:
         finally:
             self._driver = None
 
-
-
-    def __enter__(self):
-        """
-        Enter in with statement.
-        """
-        return self
-
-
-
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """
-        Exit from with statement.
-        """
-        self.close()

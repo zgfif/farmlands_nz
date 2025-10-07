@@ -6,6 +6,7 @@ from applib.item_urls_collector import ItemUrlsCollector
 
 
 
+
 class CollectData:
     def __init__(self, url: str, filepath: str = 'data.xlsx') -> None:
         self._url = url

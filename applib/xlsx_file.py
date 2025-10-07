@@ -2,11 +2,11 @@ from openpyxl import Workbook
 import openpyxl
 from pathlib import Path
 from logging import Logger
+from applib.with_mixin import WithMixin
 
 
 
-
-class XlsxFile:
+class XlsxFile(WithMixin):
     COLUMNS = (
         'sku', 
         'item',
@@ -97,19 +97,3 @@ class XlsxFile:
         if self._workbook:
             self._logger.debug('Closing %s ...', self._filepath)
             self._workbook.close()
-
-
-
-    def __enter__(self):
-        """
-        Enter in with statement.
-        """
-        return self
-
-
-
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """
-        Exit from with statement.
-        """
-        self.close()
