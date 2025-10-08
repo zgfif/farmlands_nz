@@ -23,7 +23,11 @@ class XlsxFile(WithMixin):
         self._filepath = filepath
         self._logger = logger
         self._prepare_file()
-        self._workbook = openpyxl.load_workbook(self._filepath)
+        try:
+            self._workbook = openpyxl.load_workbook(self._filepath)
+        except Exception:
+            self._logger.error('Workbook %s not found after preparation.', self._filepath)
+            raise
         self._sheet = self._workbook.active
 
 
@@ -31,6 +35,14 @@ class XlsxFile(WithMixin):
         """Add row to end of xlsx file."""
         if not self._sheet:
             self._logger.warning('No active sheet to add row.')
+            return
+        
+        if len(data) != len(self.COLUMNS):
+            self._logger.info(
+                'Row length mismatch expected: %d, got: %d', 
+                len(self.COLUMNS), 
+                len(data)
+            )
             return
 
         self._sheet.append(data)
@@ -43,37 +55,35 @@ class XlsxFile(WithMixin):
             self._logger.warning('no active sheet. Return an empty tuple.')
             return tuple()
 
-        return tuple(row for row in self._sheet.iter_rows(min_row=1, max_row=self._sheet.max_row, values_only=True))
+        return tuple(self._sheet.iter_rows(values_only=True))
 
 
     def _prepare_file(self) -> None:
         """Prepare path for file."""
-        file_path = Path(self._filepath)
+        path = Path(self._filepath)
 
-        if Path.exists(file_path):
-            self._logger.info('file %s already exists.', self._filepath)
+        if Path.exists(path):
+            self._logger.info('File %s already exists.', self._filepath)
             return
         
-        self._logger.info('Create file %s ...', self._filepath)
-        file_path.parent.mkdir(parents=True, exist_ok=True)
+        self._logger.info('Creating file %s', self._filepath)
+        path.parent.mkdir(parents=True, exist_ok=True)
         self._create_with_columns()
 
 
     def _create_with_columns(self) -> None:
-        """Create a xlsx file."""
+        """Create a new xlsx file with header columns."""
         workbook = Workbook()
-        
         sheet = workbook.active
-        if not sheet:
-            self._logger.warning('Could not found active sheet.')
-            return
-
-        sheet.append(self.COLUMNS)
+        
+        if sheet is not None:
+            sheet.append(self.COLUMNS)
+        
         workbook.save(self._filepath)
 
 
     def close(self) -> None:
         """Close workbook."""
         if self._workbook:
-            self._logger.debug('Closing %s ...', self._filepath)
+            self._logger.debug('Closing %s', self._filepath)
             self._workbook.close()
