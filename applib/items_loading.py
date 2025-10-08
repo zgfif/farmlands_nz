@@ -16,11 +16,8 @@ class ItemsLoading:
         self._logger = logger
 
 
-
     def perform(self) -> None:
-        """
-        Perform click on button 'load more' while it exists.
-        """
+        """Perform click on button 'load more' while it exists."""
         self._logger.info('Loading items...')
         
         while True:           
@@ -38,11 +35,8 @@ class ItemsLoading:
         self._logger.info('Finish loading items.')
 
 
-
     def _click_on_element(self, element: WebElement) -> None:
-        """
-        Scroll element into visible area and click on it.
-        """
+        """Scroll element into visible area and click on it."""
         self._driver.execute_script(
             "arguments[0].scrollIntoView({ behavior: 'instant', block: 'center', inline: 'end' });", 
             element
@@ -52,9 +46,7 @@ class ItemsLoading:
 
     
     def _load_more_button_element(self) -> Optional[WebElement]:
-        """
-        Return Load more button element. If could not found return None.
-        """
+        """Return Load more button element. If could not found return None."""
         selector = (By.CSS_SELECTOR, "button[type='load_more']")
         
         try:

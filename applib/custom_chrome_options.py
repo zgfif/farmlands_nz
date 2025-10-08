@@ -16,9 +16,7 @@ class CustomChromeOptions:
 
 
     def setup(self) -> Options:
-        """
-        Configure options object for Chrome and return it.
-        """
+        """Configure options object for Chrome and return it."""
         if self._headless:
             try:
                 self._options.add_argument('--headless=new')
@@ -36,7 +34,5 @@ class CustomChromeOptions:
 
 
     def _default_user_agent(self) -> str:
-        """
-        Return default user-agent.
-        """
+        """Return default user-agent."""
         return 'Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0'

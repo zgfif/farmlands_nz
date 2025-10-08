@@ -19,7 +19,6 @@ class ItemUrlsCollector:
         self._logger = logger
 
 
-
     def collect(self) -> list[str]:
         """
         Collects and returns a list of item URLs from the page.
@@ -31,7 +30,6 @@ class ItemUrlsCollector:
             if (link := self._link_element(item)) 
             and (href := link.get_attribute('href'))
         ]
-
 
 
     def _items_elements(self) -> list[WebElement]:
@@ -48,11 +46,8 @@ class ItemUrlsCollector:
             return []
 
 
-
     def _link_element(self, parent_element: WebElement) -> WebElement | None:
-        """
-        Return link element. If could not found return None.
-        """
+        """Return link element. If could not found return None."""
         try:
             return parent_element.find_element(By.TAG_NAME, 'a')
         except NoSuchElementException:

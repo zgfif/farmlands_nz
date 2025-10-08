@@ -19,20 +19,15 @@ class Browser(WithMixin):
 
 
     def start(self) -> None:
-        """
-        Start Chrome driver with custom options.        
-        """
+        """Start Chrome driver with custom options."""
         if self._driver is None:
             options = CustomChromeOptions(logger=self._logger, headless=False).setup()
             self._driver = webdriver.Chrome(options=options)
             self.logger.info('Browser started.')
 
 
-
     def open(self, url: str) -> None:
-        """
-        Open page by url.
-        """
+        """Open page by url."""
         if not self._driver:
             self.logger.error('Driver is not initialized.')
             return
@@ -51,29 +46,20 @@ class Browser(WithMixin):
             self.logger.exception('WebDriverException while opening url: %s', e)
 
 
-
     @property
     def driver(self) -> webdriver.Chrome | None:
-        """
-        Return the instance of driver.
-        """
+        """Return the instance of driver."""
         return self._driver
-
 
 
     @property
     def logger(self) -> Logger:
-        """
-        Return the instance of logger.
-        """
+        """Return the instance of logger."""
         return self._logger
 
 
-
     def close(self) -> None:
-        """
-        Close browser.
-        """
+        """Close browser."""
         if self._driver is None:
             return
 
@@ -84,4 +70,3 @@ class Browser(WithMixin):
             self.logger.warning('Driver is already closed or not available.')
         finally:
             self._driver = None
-

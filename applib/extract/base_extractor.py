@@ -17,6 +17,9 @@ class BaseExtractor:
         self._logger = logger
 
 
+    def extract(self) -> str:
+        return ''
+
 
     def _find_element(self, selector: tuple[str, str], condition: Callable, description: str) -> WebElement | None:
         """

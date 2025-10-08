@@ -18,46 +18,36 @@ class XlsxFile(WithMixin):
         'promotion_price',
     )
 
+
     def __init__(self, logger: Logger, filepath: str) -> None:
         self._filepath = filepath
         self._logger = logger
         self._prepare_file()
         self._workbook = openpyxl.load_workbook(self._filepath)
-        
         self._sheet = self._workbook.active
 
-    
 
     def add_row(self, data: tuple) -> None:
-        """
-        Add row to end of xlsx file.
-        """
+        """Add row to end of xlsx file."""
         if not self._sheet:
             self._logger.warning('No active sheet to add row.')
             return
 
         self._sheet.append(data)
-        
         self._workbook.save(self._filepath)
 
 
-
     def rows(self) -> tuple:
-        """
-        Return rows from xlsx file.
-        """
+        """Return rows from xlsx file."""
         if not self._sheet:
             self._logger.warning('no active sheet. Return an empty tuple.')
             return tuple()
-        
+
         return tuple(row for row in self._sheet.iter_rows(min_row=1, max_row=self._sheet.max_row, values_only=True))
 
 
-
     def _prepare_file(self) -> None:
-        """
-        Prepare path for file.
-        """
+        """Prepare path for file."""
         file_path = Path(self._filepath)
 
         if Path.exists(file_path):
@@ -65,35 +55,25 @@ class XlsxFile(WithMixin):
             return
         
         self._logger.info('Create file %s ...', self._filepath)
-        
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        
         self._create_with_columns()
 
 
-
     def _create_with_columns(self) -> None:
-        """
-        Create a xlsx file.
-        """
+        """Create a xlsx file."""
         workbook = Workbook()
         
         sheet = workbook.active
-        
         if not sheet:
             self._logger.warning('Could not found active sheet.')
             return
 
         sheet.append(self.COLUMNS)
-        
         workbook.save(self._filepath)
 
 
-
     def close(self) -> None:
-        """
-        Close workbook.
-        """
+        """Close workbook."""
         if self._workbook:
             self._logger.debug('Closing %s ...', self._filepath)
             self._workbook.close()
